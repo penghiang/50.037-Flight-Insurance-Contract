@@ -1,5 +1,5 @@
 pragma solidity ^0.4.25;
-contract oraclize{
+contract Oraclize{
     uint ETHSGD = 16362;
     // This is in cents.
 

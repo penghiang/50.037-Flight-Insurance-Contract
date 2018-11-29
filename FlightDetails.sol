@@ -13,7 +13,7 @@ contract FlightDetails {
     mapping (address => bool) private admins;
     address private creator;
 
-    function FlightDetails(){
+    constructor() public {
         creator = msg.sender;
         admins[creator] = true;
     }
@@ -51,24 +51,21 @@ contract FlightDetails {
         Flight flight = flights[flightNumber][departureDate][from];
         if (flight.cancelled) {
             if(flight.users[user] == 1) {
-                // flight.users[user] = 3;
                 return 500000;
             }
             else if (flight.users[user] == 2){
-                // flight.users[user] = 3;
                 return 480000;
             }
         }
         else if (flight.delayed) {
             if(flight.users[user] == 1){
-                // flight.users[user] = 2;
                 return 20000;
             }
         }
         return 0;
     }
 
-    // This function should be called from the other contract.
+    // This function should be transacted from the other contract.
     // We might need to add the contract to admins
     function _confirmClaim(string flightNumber, string departureDate, string from, address user, uint amount) {
         require(admins[msg.sender]);
