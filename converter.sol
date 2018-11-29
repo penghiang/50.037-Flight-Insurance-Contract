@@ -79,3 +79,10 @@ contract oraclize{
 // we can use .listen to listen every hour.
 // not sure about the payment to oraclize
 // we run update and pay, so we are paying the previous oracle's cost. 
+
+// To calculate how much sgd to usd is, we can use oraclize to convert. 
+// Using the frontend, we can update the value with a listener.
+// The backend (server) should query for the updated sgd value every day.
+// 
+// https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=SGD
+// https://min-api.cryptocompare.com/documentation
