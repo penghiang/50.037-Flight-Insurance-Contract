@@ -30,7 +30,7 @@ contract FlightDelay{
     address private flightDetails;
     address private creator;
     
-    constructor() public {
+    constructor() payable public {
         creator = msg.sender;
     }
 
@@ -79,6 +79,7 @@ contract FlightDelay{
                 users[msg.sender].loyaltyPoints -= 100;
             }
             else {
+                // convertToWei works from outside when called.
                 require(msg.value >= convertToWei(2000));
             }
             users[msg.sender].loyaltyPoints += 10;
@@ -100,6 +101,12 @@ contract FlightDelay{
 
     function getRecentTicket(address user) view public returns (string){
         return users[user].tickets[users[user].tickets.length - 1];
+        // return users[user].tickets[0];
+    }
+
+    function getRecentTicketSelf() view public returns (string){
+        return users[msg.sender].tickets[users[msg.sender].tickets.length - 1];
+        // return users[msg.sender].tickets[0];
     }
 
     // Current plan is our server queries API then uploads it to a contract which has all the information.

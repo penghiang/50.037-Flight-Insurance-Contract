@@ -13,7 +13,7 @@ contract FlightDetails {
     mapping (address => bool) private admins;
     address private creator;
 
-    constructor() public {
+    constructor() payable public {
         creator = msg.sender;
         admins[creator] = true;
     }

@@ -1,5 +1,6 @@
 from solc import compile_source
 from web3.auto import w3
+from web3 import Web3
 
 contract_source_code = None
 contract_source_code_file = 'FlightDetails.sol'
@@ -29,7 +30,7 @@ interfaceOracle = contract_compiled['<stdin>:Oraclize']
 
 
 # Set the default account
-w3.eth.defaultAccount = w3.eth.accounts[0]
+w3.eth.defaultAccount = w3.eth.accounts[2]
 
 # Contract abstraction
 DetailsAbstraction = w3.eth.contract(abi=interfaceDetails['abi'], bytecode=interfaceDetails['bin'])
@@ -40,7 +41,7 @@ OracleAbstraction = w3.eth.contract(abi=interfaceOracle['abi'], bytecode=interfa
 tx_hash = DetailsAbstraction.constructor().transact()
 DetailsReceipt = w3.eth.waitForTransactionReceipt(tx_hash)
 
-tx_hash2 = DelayAbstraction.constructor().transact()
+tx_hash2 = DelayAbstraction.constructor().transact({"value": w3.toWei(24.3, "ether")})
 DelayReceipt = w3.eth.waitForTransactionReceipt(tx_hash2)
 
 tx_hash3 = OracleAbstraction.constructor().transact()
@@ -58,10 +59,22 @@ OracleContract = w3.eth.contract(address=OracleReceipt.contractAddress, abi=inte
 
 DelayContract.functions.updateOracle(OracleReceipt.contractAddress).transact()
 DelayContract.functions.updateFlightDetails(DetailsReceipt.contractAddress).transact()
+DetailsContract.functions.addAdmin(DelayReceipt.contractAddress).transact()
 
+# print('addUser:', DetailsContract.functions.addUser("123", "today", "here", w3.eth.accounts[1]).transact())
+# DetailsContract.functions.flightCancelled("123", "today", "here").transact()
+# print(DetailsContract.functions.claim("123", "today", "here", w3.eth.accounts[1]).call())
 
-print('addUser:', DetailsContract.functions.addUser("123", "today", "here", w3.eth.accounts[1]).transact())
-DetailsContract.functions.flightCancelled("123", "today", "here").transact()
-print(DetailsContract.functions.claim("123", "today", "here", w3.eth.accounts[1]).call())
+amount = DelayContract.functions.convertToWei(3000).call()
+# amount = w3.toWei(1, "ether")
+print(amount)
+amount = DelayContract.functions.convertToWei(2000).call()
+print(amount)
+# amount = DelayContract.functions.convertToWei(13000).call()
+# print(amount)
 
+DelayContract.functions.buyTicket(1, "123", "today", "here").transact({"value": amount})
+
+# print(DelayContract.functions.getRecentTicketSelf().call())
+print(DelayContract.functions.getRecentTicket(w3.eth.defaultAccount).call())
 
