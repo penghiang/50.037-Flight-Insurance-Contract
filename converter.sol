@@ -11,8 +11,8 @@ contract Oraclize{
     function getETHSGD() public view returns (uint){
         return ETHSGD;
     }
-    // remember to call updatePrice and updateOracleCost.
 
+    // remember to call updatePrice and updateOracleCost.
     function updatePrice() payable {
         uint cost = getOracleCost();
         require(address(this).balance >= cost);

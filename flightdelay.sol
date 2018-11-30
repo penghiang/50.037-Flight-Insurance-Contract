@@ -16,10 +16,8 @@ contract FlightDetails {
 
 contract FlightDelay{
     // create a struct to store address and loyalty points and bought tickets
-    // convert sgd => eth
     // Check against changiairport or something for flight status, delay and cancel.
     // extract ticket data? authenticate ticket?
-    // users should be able to getInsuredFlights
 
     struct Users {
         uint loyaltyPoints;
@@ -36,11 +34,13 @@ contract FlightDelay{
         creator = msg.sender;
     }
 
+    // These 2 functions are only to be used by the creator of this contract.
+    // We are able to change the contracts of the oracle and flightdetails if required.
+    // These should be run during initialisation.
     function updateOracle(address oracleAddress) public {
         require(msg.sender == creator);
         SGDoracle = oracleAddress;
     }
-
     function updateFlightDetails(address flightDetailsAddress) public {
         require(msg.sender == creator);
         flightDetails = flightDetailsAddress;
@@ -57,52 +57,55 @@ contract FlightDelay{
         return SGD*1000000000000000000/rate;
     }
 
-    function buyTicket(uint8 ways, string flightNumber, string departureDate, string from) public payable {
-        FlightDetails flightdetails = FlightDetails(flightDetails);
-        if (ways == 2) {
-            // Round trip ticket.
-            // Check for 150 loyalty points or 30 sgd
-            // TODO: allow another destination, since it's a round trip ticket.
-            if (users[msg.sender].loyaltyPoints > 150) {
-                users[msg.sender].loyaltyPoints -= 150;
-            }
-            else {
-                // calculate exchange rate, 3000 cents.
-                require(msg.value >= convertToWei(3000));
-            }
-            users[msg.sender].loyaltyPoints += 30;
-            _buyTicket(flightNumber, departureDate, from, msg.sender);
+    // Buys ticket with provided values.
+    function buyTicket(string flightNumber, string departureDate, string from) public payable {
+        if (users[msg.sender].loyaltyPoints > 100) {
+            users[msg.sender].loyaltyPoints -= 100;
         }
         else {
-            // Check for 100 loyalty points or 20 sgd, one way ticket.
-            if (users[msg.sender].loyaltyPoints > 100) {
-                users[msg.sender].loyaltyPoints -= 100;
-            }
-            else {
-                // convertToWei works from outside when called.
-                require(msg.value >= convertToWei(2000));
-            }
-            users[msg.sender].loyaltyPoints += 10;
-            _buyTicket(flightNumber, departureDate, from, msg.sender);
+            // calculate exchange rate, 2000 cents.
+            require(msg.value >= convertToWei(2000));
         }
+        users[msg.sender].loyaltyPoints += 10;
+        _buyTicket(flightNumber, departureDate, from, msg.sender);
     }
 
+    // Buys 2 way ticket with provided values.
+    function buyTicket2(string flightNumber, string departureDate, string from, string flightNumber2, string departureDate2, string from2) public payable {
+        if (users[msg.sender].loyaltyPoints > 150) {
+                users[msg.sender].loyaltyPoints -= 150;
+            }
+        else {
+            // calculate exchange rate, 3000 cents.
+            require(msg.value >= convertToWei(3000));
+        }
+        users[msg.sender].loyaltyPoints += 30;
+        _buyTicket(flightNumber, departureDate, from, msg.sender);
+        _buyTicket(flightNumber2, departureDate2, from2, msg.sender);
+    }
+
+    // Updates the oracle's conversion rate and cost
+    // Updates FlightDetails with user information.
+    // Adds tickets to users list, which we can display later.
     function _buyTicket(string flightNumber, string departureDate, string from, address user) public payable{
-        // TODO: update oracle eth/sgd and cost price 
+        
         FlightDetails flightdetails = FlightDetails(flightDetails);
         Oraclize oracle = Oraclize(SGDoracle);
-        // TODO: send oracle some money to cover.
+
         uint oracleCost = oracle.getOracleCost();
         
-        // This line is bugged.
+        // We run both updatePrice and updateOracleCost to be updated. 
+        // This function sends money to the oracle so it would be topped up to use Oraclize.
         oracle.updatePrice.value(oracleCost)();
-
         oracle.updateOracleCost();
 
         flightdetails.addUser(flightNumber, departureDate, from, user);
-        users[user].tickets.push(string(abi.encodePacked(flightNumber, departureDate, from)));
+        users[user].tickets.push(string(abi.encodePacked(flightNumber, " ", departureDate, " ", from)));
     }
 
+    // Uses msg.sender as address
+    // First checks the amount of money user is entitled to, then transfers the amount.
+    // _confirmClaim is run after .transfer in case this contract doesn't have enough money to transfer.
     function claimMoney(string flightNumber, string departureDate, string from) public {
         FlightDetails flightdetails = FlightDetails(flightDetails);
         
@@ -114,6 +117,7 @@ contract FlightDelay{
         flightdetails._confirmClaim(flightNumber, departureDate, from, msg.sender, amount);
     }
 
+    // Allows the user to see his most recent ticket purchase.
     function getRecentTicket(address user) view public returns (string){
         return users[user].tickets[users[user].tickets.length - 1];
     }
@@ -122,9 +126,13 @@ contract FlightDelay{
         return users[msg.sender].tickets[users[msg.sender].tickets.length - 1];
     }
 
+    // Same as getRecentTicket but has another input. 
+    // Input should be 1 for the most recent ticket, 2 for the second most recent...
+    function getRecentTickets(address user, uint ticketNumber) view public returns (string) {
+        require(ticketNumber > 0);
+        return users[user].tickets[users[user].tickets.length - ticketNumber];
+    }
+
     // This fallback function can be used to top up money.
     function () payable public {}
-
-    // Current plan is our server queries API then uploads it to a contract which has all the information.
-    // When travellers claim, the function will check the record against the contract which has all the information.
 }

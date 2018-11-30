@@ -54,12 +54,12 @@ OracleContract = w3.eth.contract(address=OracleReceipt.contractAddress, abi=inte
 # contract_address = "0x2B6329Ee49Cfe81c6ce80e81A9eD3eE54ae9A424"
 # example = w3.eth.contract(contract_address, abi=interface_FlightDetails['abi'])
 
-# print('Calling contracts functions')
-# print('Contract address: ', example.address)
-
+# Initialisation, we have to link the contracts with each other's addresses.
+# We also have to run .addAdmin of FlightDetails so that FlightDelay can execute claims.
 DelayContract.functions.updateOracle(OracleReceipt.contractAddress).transact()
 DelayContract.functions.updateFlightDetails(DetailsReceipt.contractAddress).transact()
 DetailsContract.functions.addAdmin(DelayReceipt.contractAddress).transact()
+
 
 # print('addUser:', DetailsContract.functions.addUser("123", "today", "here", w3.eth.accounts[1]).transact())
 # DetailsContract.functions.flightCancelled("123", "today", "here").transact()
@@ -70,26 +70,23 @@ amount = DelayContract.functions.convertToWei(3000).call()
 print(amount)
 amount = DelayContract.functions.convertToWei(2000).call()
 print(amount)
-# amount = DelayContract.functions.convertToWei(13000).call()
-# print(amount)
 
-DelayContract.functions.buyTicket(1, "123", "today", "here").transact({"value": amount})
+DelayContract.functions.buyTicket("123", "today", "here").transact({"value": amount})
 
-# print(DelayContract.functions.getRecentTicketSelf().call())
 print(DelayContract.functions.getRecentTicket(w3.eth.defaultAccount).call())
 
-import time
-time.sleep(1)
+# import time
+# time.sleep(1)
 
 amount = DelayContract.functions.convertToWei(3000).call()
-DelayContract.functions.buyTicket(1, "123", "yestoday", "there").transact({"value": amount})
+DelayContract.functions.buyTicket("123", "yestoday", "there").transact({"value": amount})
 print(DelayContract.functions.getRecentTicket(w3.eth.defaultAccount).call())
 
 DetailsContract.functions.flightCancelled("123", "today", "here").transact()
 DelayContract.functions.claimMoney("123", "yestoday", "there").transact()
 
-time.sleep(2)
+# time.sleep(2)
 
 DelayContract.functions.claimMoney("123", "today", "here").transact()
 
-# Claim money works, we need to change the code of updating the oracle to transact or call or whatever.
+# Claim money works, we might need to change the code of updating the oracle to transact or call or whatever.
