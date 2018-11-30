@@ -30,7 +30,7 @@ interfaceOracle = contract_compiled['<stdin>:Oraclize']
 
 
 # Set the default account
-w3.eth.defaultAccount = w3.eth.accounts[3]
+w3.eth.defaultAccount = w3.eth.accounts[8]
 
 # Contract abstraction
 DetailsAbstraction = w3.eth.contract(abi=interfaceDetails['abi'], bytecode=interfaceDetails['bin'])
@@ -44,7 +44,7 @@ DetailsReceipt = w3.eth.waitForTransactionReceipt(tx_hash)
 tx_hash2 = DelayAbstraction.constructor().transact({"value": w3.toWei(35, "ether")})
 DelayReceipt = w3.eth.waitForTransactionReceipt(tx_hash2)
 
-tx_hash3 = OracleAbstraction.constructor().transact()
+tx_hash3 = OracleAbstraction.constructor().transact({"value": w3.toWei(1, "ether")})
 OracleReceipt = w3.eth.waitForTransactionReceipt(tx_hash3)
 
 # Contract Object
@@ -88,6 +88,8 @@ print(DelayContract.functions.getRecentTicket(w3.eth.defaultAccount).call())
 DetailsContract.functions.flightCancelled("123", "today", "here").transact()
 DelayContract.functions.claimMoney("123", "yestoday", "there").transact()
 
-time.sleep(4)
+time.sleep(2)
 
 DelayContract.functions.claimMoney("123", "today", "here").transact()
+
+# Claim money works, we need to change the code of updating the oracle to transact or call or whatever.

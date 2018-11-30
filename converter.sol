@@ -2,6 +2,7 @@ pragma solidity ^0.4.25;
 contract Oraclize{
     uint ETHSGD = 16362;
     // This is in cents.
+    constructor() payable public {}
 
     function getOracleCost() public returns (uint) {
        return 4027700000000000;
@@ -11,6 +12,17 @@ contract Oraclize{
         return ETHSGD;
     }
     // remember to call updatePrice and updateOracleCost.
+
+    function updatePrice() payable {
+        uint cost = getOracleCost();
+        require(address(this).balance >= cost);
+        // We do not usually send the cost back, but in this testing code we are just sending it to an address.
+        msg.sender.transfer(cost);
+    }
+    
+    function updateOracleCost() public returns (uint) {
+        return 1;
+    }
 }
 
 // pragma solidity ^0.4.11;

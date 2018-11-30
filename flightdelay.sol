@@ -2,6 +2,8 @@ pragma solidity ^0.4.25;
 contract Oraclize {
     function getETHSGD() public view returns (uint);
     function getOracleCost() public returns (uint);
+    function updatePrice() public payable;
+    function updateOracleCost() public returns (uint);
 }
 
 contract FlightDetails {
@@ -69,9 +71,7 @@ contract FlightDelay{
                 require(msg.value >= convertToWei(3000));
             }
             users[msg.sender].loyaltyPoints += 30;
-            flightdetails.addUser(flightNumber, departureDate, from, msg.sender);
-            users[msg.sender].tickets.push(string(abi.encodePacked(flightNumber, departureDate, from)));
-            // TODO: buy ticket.
+            _buyTicket(flightNumber, departureDate, from, msg.sender);
         }
         else {
             // Check for 100 loyalty points or 20 sgd, one way ticket.
@@ -83,11 +83,26 @@ contract FlightDelay{
                 require(msg.value >= convertToWei(2000));
             }
             users[msg.sender].loyaltyPoints += 10;
-            flightdetails.addUser(flightNumber, departureDate, from, msg.sender);
-            users[msg.sender].tickets.push(string(abi.encodePacked(flightNumber, departureDate, from)));
-            // TODO: buy ticket.
+            _buyTicket(flightNumber, departureDate, from, msg.sender);
         }
     }
+
+    function _buyTicket(string flightNumber, string departureDate, string from, address user) public payable{
+        // TODO: update oracle eth/sgd and cost price 
+        FlightDetails flightdetails = FlightDetails(flightDetails);
+        Oraclize oracle = Oraclize(SGDoracle);
+        // TODO: send oracle some money to cover.
+        uint oracleCost = oracle.getOracleCost();
+        
+        // This line is bugged.
+        oracle.updatePrice.value(oracleCost)();
+
+        oracle.updateOracleCost();
+
+        flightdetails.addUser(flightNumber, departureDate, from, user);
+        users[user].tickets.push(string(abi.encodePacked(flightNumber, departureDate, from)));
+    }
+
     function claimMoney(string flightNumber, string departureDate, string from) public {
         FlightDetails flightdetails = FlightDetails(flightDetails);
         
@@ -95,20 +110,20 @@ contract FlightDelay{
         // amount is in SGD (cents)
         uint amountWei = convertToWei(amount);
 
-        flightdetails._confirmClaim(flightNumber, departureDate, from, msg.sender, amount);
         msg.sender.transfer(amountWei);
-        // msg.sender.transfer(convertToWei(10000));
+        flightdetails._confirmClaim(flightNumber, departureDate, from, msg.sender, amount);
     }
 
     function getRecentTicket(address user) view public returns (string){
         return users[user].tickets[users[user].tickets.length - 1];
-        // return users[user].tickets[0];
     }
 
     function getRecentTicketSelf() view public returns (string){
         return users[msg.sender].tickets[users[msg.sender].tickets.length - 1];
-        // return users[msg.sender].tickets[0];
     }
+
+    // This fallback function can be used to top up money.
+    function () payable public {}
 
     // Current plan is our server queries API then uploads it to a contract which has all the information.
     // When travellers claim, the function will check the record against the contract which has all the information.
