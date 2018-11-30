@@ -97,6 +97,7 @@ contract FlightDelay{
 
         flightdetails._confirmClaim(flightNumber, departureDate, from, msg.sender, amount);
         msg.sender.transfer(amountWei);
+        // msg.sender.transfer(convertToWei(10000));
     }
 
     function getRecentTicket(address user) view public returns (string){

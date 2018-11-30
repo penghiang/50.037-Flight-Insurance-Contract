@@ -30,7 +30,7 @@ interfaceOracle = contract_compiled['<stdin>:Oraclize']
 
 
 # Set the default account
-w3.eth.defaultAccount = w3.eth.accounts[2]
+w3.eth.defaultAccount = w3.eth.accounts[3]
 
 # Contract abstraction
 DetailsAbstraction = w3.eth.contract(abi=interfaceDetails['abi'], bytecode=interfaceDetails['bin'])
@@ -41,7 +41,7 @@ OracleAbstraction = w3.eth.contract(abi=interfaceOracle['abi'], bytecode=interfa
 tx_hash = DetailsAbstraction.constructor().transact()
 DetailsReceipt = w3.eth.waitForTransactionReceipt(tx_hash)
 
-tx_hash2 = DelayAbstraction.constructor().transact({"value": w3.toWei(24.3, "ether")})
+tx_hash2 = DelayAbstraction.constructor().transact({"value": w3.toWei(35, "ether")})
 DelayReceipt = w3.eth.waitForTransactionReceipt(tx_hash2)
 
 tx_hash3 = OracleAbstraction.constructor().transact()
@@ -78,3 +78,16 @@ DelayContract.functions.buyTicket(1, "123", "today", "here").transact({"value": 
 # print(DelayContract.functions.getRecentTicketSelf().call())
 print(DelayContract.functions.getRecentTicket(w3.eth.defaultAccount).call())
 
+import time
+time.sleep(1)
+
+amount = DelayContract.functions.convertToWei(3000).call()
+DelayContract.functions.buyTicket(1, "123", "yestoday", "there").transact({"value": amount})
+print(DelayContract.functions.getRecentTicket(w3.eth.defaultAccount).call())
+
+DetailsContract.functions.flightCancelled("123", "today", "here").transact()
+DelayContract.functions.claimMoney("123", "yestoday", "there").transact()
+
+time.sleep(4)
+
+DelayContract.functions.claimMoney("123", "today", "here").transact()
