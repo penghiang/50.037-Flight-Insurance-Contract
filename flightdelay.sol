@@ -12,6 +12,7 @@ contract FlightDetails {
     function addUser(string flightNumber, string departureDate, string from, address user);
     function claim(string flightNumber, string departureDate, string from, address user) returns (uint);
     function _confirmClaim(string flightNumber, string departureDate, string from, address user, uint amount);
+    function flightFlown(string flightNumber, string departureDate, string from) public returns (bool);
 }
 
 contract FlightDelay{
@@ -91,6 +92,8 @@ contract FlightDelay{
         
         FlightDetails flightdetails = FlightDetails(flightDetails);
         Oraclize oracle = Oraclize(SGDoracle);
+
+        require(!flightdetails.flightFlown(flightNumber, departureDate, from));
 
         uint oracleCost = oracle.getOracleCost();
         

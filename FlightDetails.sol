@@ -83,4 +83,9 @@ contract FlightDetails {
         }
     }
 
+    function flightFlown(string flightNumber, string departureDate, string from) public returns (bool){
+        Flight flight = flights[flightNumber][departureDate][from];
+        return flight.delayed || flight.cancelled;
+    }
+
 }
