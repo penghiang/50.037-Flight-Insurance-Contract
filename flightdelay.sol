@@ -71,13 +71,6 @@ contract FlightDelay{
         _buyTicket(flightNumber, departureDate, from, msg.sender);
     }
 
-    // Buys ticket with provided values.
-    function buyTicketNoPoints(string flightNumber, string departureDate, string from) public payable {
-        // calculate exchange rate, 2000 cents.
-        require(msg.value >= convertToWei(2000));
-        users[msg.sender].loyaltyPoints += 10;
-        _buyTicket(flightNumber, departureDate, from, msg.sender);
-    }
 
     // Buys 2 way ticket with provided values.
     function buyTicket2(string flightNumber, string departureDate, string from, string flightNumber2, string departureDate2, string from2, bool points) public payable {
@@ -88,15 +81,6 @@ contract FlightDelay{
             // calculate exchange rate, 3000 cents.
             require(msg.value >= convertToWei(3000));
         }
-        users[msg.sender].loyaltyPoints += 30;
-        _buyTicket(flightNumber, departureDate, from, msg.sender);
-        _buyTicket(flightNumber2, departureDate2, from2, msg.sender);
-    }
-    
-    // Buys 2 way ticket with provided values.
-    function buyTicket2NoPoints(string flightNumber, string departureDate, string from, string flightNumber2, string departureDate2, string from2) public payable {
-        // calculate exchange rate, 3000 cents.
-        require(msg.value >= convertToWei(3000));
         users[msg.sender].loyaltyPoints += 30;
         _buyTicket(flightNumber, departureDate, from, msg.sender);
         _buyTicket(flightNumber2, departureDate2, from2, msg.sender);
