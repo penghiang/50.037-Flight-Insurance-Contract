@@ -59,8 +59,8 @@ contract FlightDelay{
     }
 
     // Buys ticket with provided values.
-    function buyTicket(string flightNumber, string departureDate, string from) public payable {
-        if (users[msg.sender].loyaltyPoints > 100) {
+    function buyTicket(string flightNumber, string departureDate, string from, bool points) public payable {
+        if (points && users[msg.sender].loyaltyPoints > 100) {
             users[msg.sender].loyaltyPoints -= 100;
         }
         else {
@@ -71,15 +71,32 @@ contract FlightDelay{
         _buyTicket(flightNumber, departureDate, from, msg.sender);
     }
 
+    // Buys ticket with provided values.
+    function buyTicketNoPoints(string flightNumber, string departureDate, string from) public payable {
+        // calculate exchange rate, 2000 cents.
+        require(msg.value >= convertToWei(2000));
+        users[msg.sender].loyaltyPoints += 10;
+        _buyTicket(flightNumber, departureDate, from, msg.sender);
+    }
+
     // Buys 2 way ticket with provided values.
-    function buyTicket2(string flightNumber, string departureDate, string from, string flightNumber2, string departureDate2, string from2) public payable {
-        if (users[msg.sender].loyaltyPoints > 150) {
+    function buyTicket2(string flightNumber, string departureDate, string from, string flightNumber2, string departureDate2, string from2, bool points) public payable {
+        if (points && users[msg.sender].loyaltyPoints > 150) {
                 users[msg.sender].loyaltyPoints -= 150;
             }
         else {
             // calculate exchange rate, 3000 cents.
             require(msg.value >= convertToWei(3000));
         }
+        users[msg.sender].loyaltyPoints += 30;
+        _buyTicket(flightNumber, departureDate, from, msg.sender);
+        _buyTicket(flightNumber2, departureDate2, from2, msg.sender);
+    }
+    
+    // Buys 2 way ticket with provided values.
+    function buyTicket2NoPoints(string flightNumber, string departureDate, string from, string flightNumber2, string departureDate2, string from2) public payable {
+        // calculate exchange rate, 3000 cents.
+        require(msg.value >= convertToWei(3000));
         users[msg.sender].loyaltyPoints += 30;
         _buyTicket(flightNumber, departureDate, from, msg.sender);
         _buyTicket(flightNumber2, departureDate2, from2, msg.sender);
@@ -134,6 +151,10 @@ contract FlightDelay{
     function getRecentTickets(address user, uint ticketNumber) view public returns (string) {
         require(ticketNumber > 0);
         return users[user].tickets[users[user].tickets.length - ticketNumber];
+    }
+
+    function getLoyaltyPoints() view public returns (uint) {
+        return users[msg.sender].loyaltyPoints;
     }
 
     // This fallback function can be used to top up money.

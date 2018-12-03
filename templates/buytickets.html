@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Buying Tickets</title>
+    <style media="screen">
+      body {
+        background-color: powderblue;
+        font-family: lato;
+      }
+      h1 {
+        text-align: center;
+        color: black;
+        font-size: 48px;
+      }
+      h2 {
+        text-align: center;
+        color: red;
+        font-size: 36px;
+      }
+      p {
+        text-align: center;
+        color: black;
+        font-size: 24px
+      }
+
+      #choosetixbuttons{
+        text-align: center;
+      }
+      #rttblock{
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        background-color: #F5F5F5;
+        padding: 20px;
+        width: 10%;
+      }
+
+      #owtblock{
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        background-color: #F5F5F5;
+        padding: 20px;
+        width: 10%;
+      }
+    </style>
+  <script lang="javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script lang="javascript">
+    var contract;
+    var contract2;
+    var contract3;
+
+    $(document).ready(function() {
+        if (typeof web3 !== 'undefined') {
+            var sc_address = "{{contractAddress}}";
+            var contractABI = web3.eth.contract(JSON.parse('{{contractABI | safe}}'));
+            var contractInstance = contractABI.at(sc_address);
+            
+            var sc_address2 = "{{contractAddressDetails}}";
+            var contractABI2 = web3.eth.contract(JSON.parse('{{contractABIDetails | safe}}')); 
+            var contractInstance2 = contractABI2.at(sc_address2);
+            
+            var sc_address3 = "{{contractAddressOracle}}";
+            var contractABI3 = web3.eth.contract(JSON.parse('{{contractABIOracle | safe}}')); 
+            var contractInstance3 = contractABI3.at(sc_address3);
+
+            contract3 = contractInstance3;
+            contract2 = contractInstance2;
+            contract = contractInstance;
+
+            contractInstance.getLoyaltyPoints(function(error, result){
+              if (error) {
+                reject(error);
+              } else {
+                $("#points").text(result);
+              }
+            });
+            
+            var cost1way = 0;
+            contractInstance.convertToWei.call(2000, function(error, result){
+              if (error) {
+                alert("Error");
+                reject(error);
+              } else {
+                $("#cost1way").text(result);
+                cost1way = result;
+              }
+            });
+
+            $("#buy1way").click(function(){
+                contractInstance.buyTicket(
+                  $("#owtflightnum")[0].value,$("#owtdepartdate")[0].value,$("#owtairportcode")[0].value,
+                  {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
+                    if (error) {
+                        alert("Please, connect to the network");
+                        reject(error);
+                    } else {
+                        $("#buy1way").text("BOUGHT");
+                    }
+                  }
+                );
+            });
+
+            $("#buy").click(function(){
+                contractInstance.getPlayerCount(function(error, result){
+                  if (error) {
+                      alert("Please, connect to the network");
+                      reject(error);
+                  } else {
+                      $("span#number").text(result);
+                    //   alert("getplayercount");
+                    //   alert(result);
+                  }
+                });
+            });
+            $("a#call_setNumber").click(function(){
+                      var newNumber = $("input#number").val();
+                      // alert(web3.eth.accounts[0]);
+                      // const web32 = new Web3(window.web3.currentProvider);
+                      // console.log(web32.eth.accounts)
+                      contractInstance.convertToWei.call(newNumber, function(error, result){
+                        if (error) {
+                            alert("Please, connect to the network");
+                            reject(error);
+                        }
+                      });
+                  });
+        }
+        else {
+            alert("Please, install Metamask!");
+        }
+    });
+  </script>
+
+
+  </head>
+
+  <body>
+
+    <h1>
+      Buy your flight tickets
+    </h1>
+
+    <h2>
+      You currently have <span id="points">???</span> loyalty points (LP).
+    </h2>
+
+    <p>
+      Would you like to purchase a round-trip ticket or a one-way ticket?
+    </p><br>
+
+    <div id="choosetixbuttons" class="">
+
+      <div id="rttblock" class="">
+        Rount-trip ticket: <br>
+        SGD$30; 150LP
+      </div><br>
+      Choose departure date: </br>
+      <input type="date" id="rttdepartdate" name="departure"> </br><br>
+
+      Enter Flight Number: <br>
+      <input type = "text" id = "rttflightnum" name = ""> <br><br>
+
+      Enter Departure Airport Code: <br>
+      <input type = "text" id = "rttairportcode" name = ""> <br><br>
+
+      <button type="button" name="button">Pay with SGD$30</button> <br>
+      <button type="button" name="button">Pay with 150LP</button> <br><br>
+
+      <div id="owtblock" class="">
+        One-way ticket: <br>
+        SGD$20; 100LP
+      </div><br>
+      Choose departure date: </br>
+      <input type="date" id="owtdepartdate" name="departure"> </br><br>
+
+      Enter Flight Number: <br>
+      <input type = "text" id = "owtflightnum" name = ""> <br><br>
+
+      Enter Departure Airport Code: <br>
+      <input type = "text" id = "owtairportcode" name = ""> <br><br>
+      
+      <button type="button" id="buy1way" name="button">Pay with SGD$20</button> <br>
+      <button type="button" name="button">Pay with 100LP</button> <br><br>
+      <div id="cost1way">COST SHOULD BE HERE</div>
+
+    </div>
+  </body>
+</html>

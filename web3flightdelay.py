@@ -1,6 +1,5 @@
 from solc import compile_source
 from web3.auto import w3
-from web3 import Web3
 
 contract_source_code = None
 contract_source_code_file = 'FlightDetails.sol'
@@ -71,7 +70,7 @@ print(amount)
 amount = DelayContract.functions.convertToWei(2000).call()
 print(amount)
 
-DelayContract.functions.buyTicket("123", "today", "here").transact({"value": amount})
+DelayContract.functions.buyTicket("123", "today", "here", False).transact({"value": amount})
 
 print(DelayContract.functions.getRecentTicket(w3.eth.defaultAccount).call())
 
@@ -79,7 +78,7 @@ print(DelayContract.functions.getRecentTicket(w3.eth.defaultAccount).call())
 # time.sleep(1)
 
 amount = DelayContract.functions.convertToWei(3000).call()
-DelayContract.functions.buyTicket("123", "yestoday", "there").transact({"value": amount})
+DelayContract.functions.buyTicket("123", "yestoday", "there", False).transact({"value": amount})
 print(DelayContract.functions.getRecentTicket(w3.eth.defaultAccount).call())
 
 DetailsContract.functions.flightCancelled("123", "today", "here").transact()
