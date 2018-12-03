@@ -56,10 +56,10 @@
         if (window.ethereum) {
             window.web3 = new Web3(ethereum);
             try {
-                // Request account access if needed
-                await ethereum.send('eth_requestAccounts');
-                // Acccounts now exposed
-                web3.eth.sendTransaction({/* ... */});
+              // Request account access if needed
+              await ethereum.enable();
+              // Acccounts now exposed
+              web3.eth.sendTransaction({/* ... */});
             } catch (error) {
                 // User denied account access...
             }
@@ -76,12 +76,16 @@
         }
     });
 
-    async function updateFields() {
-      await ethereum.send('eth_requestAccounts');
-      
+    function updateFields() {
+      // await ethereum.send('eth_requestAccounts');
+      contract.getLoyaltyPoints(function(error, result){
+        if (error) {
+          reject(error);
+        } else {
+          $("#points").text(result);
+        }
+      });
     }
-    
-
 
     $(document).ready(function() {
         if (typeof web3 !== 'undefined') {
@@ -101,15 +105,8 @@
             contract2 = contractInstance2;
             contract = contractInstance;
 
-            
-
-            contractInstance.getLoyaltyPoints(function(error, result){
-              if (error) {
-                reject(error);
-              } else {
-                $("#points").text(result);
-              }
-            });
+            // we delay here before updating loyalty points to make sure web3.eth.accounts is populated.
+            setTimeout(updateFields, 1000);
             
             var cost1way = 0;
             contractInstance.convertToWei.call(2000, function(error, result){
