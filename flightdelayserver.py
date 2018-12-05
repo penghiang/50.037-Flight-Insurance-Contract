@@ -100,6 +100,17 @@ def buy():
         contractABIOracle = json.dumps(interfaceOracle['abi'])
     )
 
+@app.route("/main")
+def mainpage():
+    return render_template(
+        'mainpage.html',
+        contractAddress = DelayContract.address.lower(), 
+        contractABI = json.dumps(interfaceDelay['abi']),
+        contractAddressDetails = DetailsContract.address.lower(),
+        contractABIDetails = json.dumps(interfaceDetails['abi']),
+        contractAddressOracle = OracleContract.address.lower(),
+        contractABIOracle = json.dumps(interfaceOracle['abi'])
+    )
 
 
 

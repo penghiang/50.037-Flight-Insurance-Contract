@@ -152,7 +152,193 @@
       }
 
     </style>
+    <script lang="javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <!-- <script lang="javascript" src="{{url_for('static', filename='ethereum_enable.js')}}"></script> -->
+    <script lang="javascript">
+      var contract;
+      var contract2;
+      var contract3;
+
+      window.addEventListener('load', async () => {
+        // Modern dapp browsers...
+        if (window.ethereum) {
+            window.web3 = new Web3(ethereum);
+            try {
+              // Request account access if needed
+              await ethereum.enable();
+              // Acccounts now exposed
+              web3.eth.sendTransaction({/* ... */});
+            } catch (error) {
+                // User denied account access...
+            }
+        }
+        // Legacy dapp browsers...
+        else if (window.web3) {
+            window.web3 = new Web3(web3.currentProvider);
+            // Acccounts always exposed
+            web3.eth.sendTransaction({/* ... */});
+        }
+        // Non-dapp browsers...
+        else {
+            console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+        }
+        updateFields();
+      });
+      
+      function updateFields() {
+        contract.getLoyaltyPoints(function(error, result){
+          if (error) {
+            reject(error);
+          } else {
+            $("#points").text(result);
+          }
+        });
+      }
+
+      function claimAlert(){
+        var flightnum = $("#claimflightnum")[0].value;
+        var date = $("#claimdepartdate")[0].value;
+        var from = $("#claimdap")[0].value;
+        contract.claimMoney(
+          flightnum, date, from, 
+          {from:web3.eth.accounts[0]}, function(error, result){
+            if(error) {
+              alert("Please, connect to the network");
+              reject(error);
+            } 
+            else {
+              claimAmount(flightnum, date, from).then(function(result){
+                alert("Claimed insurance for: " + flightnum + ", amount: " + result); 
+              }, function(err) {
+                console.log("Promise error");
+              })
+            }
+          }
+        )
+      }
+
+      function claimAmount(flightnum, date, from) {
+        return new Promise (function (resolve, reject) {
+          var amount;
+          contract2.claim.call(
+            flightnum, date, from, web3.eth.accounts[0],
+            function(error, result){
+              if(error) {
+                alert("Please, connect to the network");
+                reject(error);
+              } 
+              else {
+                // console.log(result);
+                amount = result;
+                resolve(result);
+                // console.log(amount);
+              }
+            }
+          )
+        })
+        // await amount;
+        // console.log(amount);
+        // return amount;
+      }
+
+
+
+      $(document).ready(function() {
+          if (typeof web3 !== 'undefined') {
+              var sc_address = "{{contractAddress}}";
+              var contractABI = web3.eth.contract(JSON.parse('{{contractABI | safe}}'));
+              var contractInstance = contractABI.at(sc_address);
+              
+              var sc_address2 = "{{contractAddressDetails}}";
+              var contractABI2 = web3.eth.contract(JSON.parse('{{contractABIDetails | safe}}')); 
+              var contractInstance2 = contractABI2.at(sc_address2);
+              
+              var sc_address3 = "{{contractAddressOracle}}";
+              var contractABI3 = web3.eth.contract(JSON.parse('{{contractABIOracle | safe}}')); 
+              var contractInstance3 = contractABI3.at(sc_address3);
+
+              contract3 = contractInstance3;
+              contract2 = contractInstance2;
+              contract = contractInstance;
+              
+              var cost1way = 0;
+              contractInstance.convertToWei.call(2000, function(error, result){
+                if (error) {
+                  alert("Error");
+                  reject(error);
+                } else {
+                  // console.log(result);
+                  $("#cost1way").text(result);
+                  cost1way = result;
+                }
+              });
+              contractInstance.convertToWei.call(3000, function(error, result){
+                if (error) {
+                  alert("Error");
+                  reject(error);
+                } else {
+                  $("#cost2way").text(result);
+                }
+              });
+
+              function buy1wayticket(points) {
+                var flightnum = $("#buyflightnum")[0].value;
+                contractInstance.buyTicket(
+                  flightnum ,$("#buydepartdate")[0].value,$("#buydap")[0].value, points,
+                  {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
+                    if (error) {
+                      alert("Please, connect to the network");
+                      reject(error);
+                    } else {
+                      alert("Bought insurance for " + flightnum);
+                      updateFields();
+                    }
+                  }
+                );
+              }
+
+              function buy2wayticket(points) {
+                // contractInstance.buyTicket2(
+                //   ...
+                // );
+              }
+
+              $("#sgdticket").click(function(){
+                if($("#ticketoption")[0].value === "rtt"){
+
+                } 
+                else {
+                  buy1wayticket(false);
+                }
+
+              });
+
+              $("#lpticket").click(function(){
+                if($("#ticketoption")[0].value === "rtt"){
+
+                }
+                else {
+                  buy1wayticket(true);
+                }
+              })
+
+              $("#buy1way").click(function(){
+                buy1wayticket(false);
+              });
+
+              $("#buy1waypoints").click(function(){
+                buy1wayticket(true);
+              });
+
+          }
+          else {
+              alert("Please, install Metamask!");
+          }
+      });
+    </script>
+
   </head>
+  
   <body>
 
     <!-- welcome message -->
@@ -161,13 +347,13 @@
     </h1>
     <!-- loyalty points notification -->
     <h2 id="header2" class="pageheader">
-      You currently have xxx loyalty points(LP).
+      You currently have <span id="points"></span> loyalty points(LP).
     </h2>
 
     <div id="buyticketsection" class="majorblock">
       <div id="claimsection" class="minorblock">
         <h2>Buy Tickets</h2><br>
-        <p class="iconpng"> <img src="assets\icons\buy.png" width="240px" height="240px" </p>
+        <p class="iconpng"> <img src="{{url_for('static', filename='buy.png')}}" width="240px" height="240px" </p>
       </div>
       <div id="claimdetailsection" class="minorblock">
         <h2>Ticket Details</h2><br>
@@ -180,6 +366,10 @@
           <tr>
             <td class="tixcell"><b>SGD$30</b> OR <b>150LP</b></td>
             <td class="tixcell"><b>SGD$20</b> OR <b>100LP</b></td>
+          </tr>
+          <tr>
+            <td>The cost is <span id="cost1way"></span> wei.</td>
+            <td>The cost is <span id="cost2way"></span> wei.</td>
           </tr>
 
           <tr>
@@ -196,7 +386,7 @@
           <tr>
             <td class="bttfont">Choose Ticket Type:</td>
             <td>
-              <select class="bttinput" name="">
+              <select class="bttinput" name="" id="ticketoption">
                 <option value="rtt">Round-Trip Ticket</option>
                 <option value="owt">One-Way Ticket</option>
               </select>
@@ -222,8 +412,8 @@
           </tr>
         </table><br>
         <div>
-          <button class="leftrightbuybutton" type="button" name="button"><b> Buy with SGD </b></button>
-          <button class="leftrightbuybutton" type="button" name="button"><b> Buy with LP </b></button>
+          <button class="leftrightbuybutton" type="button" name="button" id="sgdticket"><b> Buy with SGD </b></button>
+          <button class="leftrightbuybutton" type="button" name="button" id="lpticket"><b> Buy with LP </b></button>
         </div>
       </div>
     </div><br><br>
@@ -231,7 +421,7 @@
     <div id="claimflightinsurancesection" class="majorblock2">
       <div class="minorblock2">
         <h2>Claim Flight Insurance </h2><br>
-        <p class="iconpng"> <img src="assets\icons\flight.png" width="240px" height="240px" </p>
+        <p class="iconpng"> <img src="{{url_for('static', filename='flight.png')}}" width="240px" height="240px" </p>
       </div>
       <div class="minorblock2">
         <h2>Enter Your Flight Details</h2><br>

@@ -110,7 +110,7 @@ contract FlightDelay{
     // Uses msg.sender as address
     // First checks the amount of money user is entitled to, then transfers the amount.
     // _confirmClaim is run after .transfer in case this contract doesn't have enough money to transfer.
-    function claimMoney(string flightNumber, string departureDate, string from) public {
+    function claimMoney(string flightNumber, string departureDate, string from) public returns (uint){
         FlightDetails flightdetails = FlightDetails(flightDetails);
         
         uint amount = flightdetails.claim(flightNumber, departureDate, from, msg.sender);
@@ -119,6 +119,7 @@ contract FlightDelay{
 
         flightdetails._confirmClaim(flightNumber, departureDate, from, msg.sender, amount);
         msg.sender.transfer(amountWei);
+        return amountWei;
     }
 
     // Allows the user to see his most recent ticket purchase.
