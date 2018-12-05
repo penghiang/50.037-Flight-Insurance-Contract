@@ -86,7 +86,7 @@ def index():
         contractABIDetails = json.dumps(interfaceDetails['abi']),
         contractAddressOracle = OracleContract.address.lower(),
         contractABIOracle = json.dumps(interfaceOracle['abi'])
-        )
+    )
 
 @app.route("/buy")
 def buy():
@@ -98,7 +98,7 @@ def buy():
         contractABIDetails = json.dumps(interfaceDetails['abi']),
         contractAddressOracle = OracleContract.address.lower(),
         contractABIOracle = json.dumps(interfaceOracle['abi'])
-        )
+    )
 
 
 

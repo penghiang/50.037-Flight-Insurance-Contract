@@ -88,6 +88,8 @@
       });
     }
 
+
+
     $(document).ready(function() {
         if (typeof web3 !== 'undefined') {
             var sc_address = "{{contractAddress}}";
@@ -105,9 +107,6 @@
             contract3 = contractInstance3;
             contract2 = contractInstance2;
             contract = contractInstance;
-
-            // // we delay here before updating loyalty points to make sure web3.eth.accounts is populated.
-            // setTimeout(updateFields, 1000);
             
             var cost1way = 0;
             contractInstance.convertToWei.call(2000, function(error, result){
@@ -119,45 +118,38 @@
                 cost1way = result;
               }
             });
+            contractInstance.convertToWei.call(3000, function(error, result){
+              if (error) {
+                alert("Error");
+                reject(error);
+              } else {
+                $("#cost2way").text(result);
+              }
+            });
+
+            function buy1wayticket(points) {
+              contractInstance.buyTicket(
+                $("#owtflightnum")[0].value,$("#owtdepartdate")[0].value,$("#owtairportcode")[0].value, points,
+                {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
+                  if (error) {
+                    alert("Please, connect to the network");
+                    reject(error);
+                  } else {
+                    alert("Bought!");
+                    updateFields();
+                  }
+                }
+              );
+            }
 
             $("#buy1way").click(function(){
-                contractInstance.buyTicket(
-                  $("#owtflightnum")[0].value,$("#owtdepartdate")[0].value,$("#owtairportcode")[0].value, true,
-                  {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
-                    if (error) {
-                        alert("Please, connect to the network");
-                        reject(error);
-                    } else {
-                        $("#buy1way").text("BOUGHT");
-                    }
-                  }
-                );
+              buy1wayticket(false);
             });
 
-            $("#buy").click(function(){
-                contractInstance.getPlayerCount(function(error, result){
-                  if (error) {
-                      alert("Please, connect to the network");
-                      reject(error);
-                  } else {
-                      $("span#number").text(result);
-                    //   alert("getplayercount");
-                    //   alert(result);
-                  }
-                });
+            $("#buy1waypoints").click(function(){
+              buy1wayticket(true);
             });
-            $("a#call_setNumber").click(function(){
-                      var newNumber = $("input#number").val();
-                      // alert(web3.eth.accounts[0]);
-                      // const web32 = new Web3(window.web3.currentProvider);
-                      // console.log(web32.eth.accounts)
-                      contractInstance.convertToWei.call(newNumber, function(error, result){
-                        if (error) {
-                            alert("Please, connect to the network");
-                            reject(error);
-                        }
-                      });
-                  });
+
         }
         else {
             alert("Please, install Metamask!");
@@ -199,6 +191,7 @@
 
       <button type="button" name="button">Pay with SGD$30</button> <br>
       <button type="button" name="button">Pay with 150LP</button> <br><br>
+      <div>The cost would be: <span id="cost2way"></span> Wei.</div>
 
       <div id="owtblock" class="">
         One-way ticket: <br>
@@ -214,8 +207,8 @@
       <input type = "text" id = "owtairportcode" name = ""> <br><br>
       
       <button type="button" id="buy1way" name="button">Pay with SGD$20</button> <br>
-      <button type="button" name="button">Pay with 100LP</button> <br><br>
-      <div id="cost1way">COST SHOULD BE HERE</div>
+      <button type="button" id="buy1waypoints" name="button">Pay with 100LP</button> <br><br>
+      <div>The cost would be: <span id="cost1way"></span> Wei.</div>
 
     </div>
   </body>
