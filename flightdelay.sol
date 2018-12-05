@@ -76,7 +76,7 @@ contract FlightDelay{
     function buyTicket2(string flightNumber, string departureDate, string from, string flightNumber2, string departureDate2, string from2, bool points) public payable {
         if (points && users[msg.sender].loyaltyPoints > 150) {
                 users[msg.sender].loyaltyPoints -= 150;
-            }
+        }
         else {
             // calculate exchange rate, 3000 cents.
             require(msg.value >= convertToWei(3000));
@@ -117,8 +117,8 @@ contract FlightDelay{
         // amount is in SGD (cents)
         uint amountWei = convertToWei(amount);
 
-        msg.sender.transfer(amountWei);
         flightdetails._confirmClaim(flightNumber, departureDate, from, msg.sender, amount);
+        msg.sender.transfer(amountWei);
     }
 
     // Allows the user to see his most recent ticket purchase.

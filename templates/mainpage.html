@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Flight Insurance Management for Travelers</title>
+    <style media="screen">
+      body {
+        text-align: center;
+        background-color: powderblue;
+        font-family: lato;
+      }
+      input, select {
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+      }
+      .pageheader{
+        text-align: center;
+      }
+
+      .majorblock {
+        margin: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+      }
+
+      .majorblock2 {
+        margin: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+      }
+      .minorblock, .minorblock2 {
+        padding: 20px;
+        flex-grow: 1;
+        flex-basis: 0;
+      }
+
+      .tixtable {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .tixtable {
+        border-spacing: 20px;
+        border: 1px solid black;
+        padding: none;
+      }
+      .tixheader {
+        padding: 5px;
+        font-size: 28px;
+      }
+      .tixcell {
+        border: 1px black solid;
+        padding: 10px;
+        font-size: 24px;
+      }
+      #tixtablefootnote {
+        font-size: 10px;
+        border: 0px;
+        text-align: left;
+        padding: 0px;
+      }
+
+      #buytixtable, #claimflighttable {
+        border: 0px;
+        padding: 0px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .bttfont, .bttinput , .cftfont, .cftinput{
+        padding: 10px;
+        border: 1px solid black;
+        border-spacing: 5px;
+      }
+
+      .bttfont, .cftfont {
+        text-align: left;
+        font-size: 16px;
+      }
+
+      .bttinput, .cftinput {
+        text-align: left;
+        font-size: 16px;
+        width: 90%;
+      }
+
+      .leftrightbuybutton, .claimsbutton {
+        background-color: white;
+        width: 150px;
+        height: 40px;
+        border: 1px, black;
+        padding: none;
+        font-size: 16px;
+        text-align: center;
+      }
+
+  <!---------------------------------------------------------------------------------------------------------->
+      /* The popup form - hidden by default */
+      .form-popup {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        right: 15px;
+        border: 3px solid #f1f1f1;
+        z-index: 9;
+      }
+
+      /* Add styles to the form container */
+      .form-container {
+        max-width: 300px;
+        padding: 10px;
+        background-color: white;
+      }
+
+      /* Full-width input fields */
+      .form-container input[type=text], .form-container input[type=password] {
+        width: 100%;
+        padding: 15px;
+        margin: 5px 0 22px 0;
+        border: none;
+        background: #f1f1f1;
+      }
+
+      /* When the inputs get focus, do something */
+      .form-container input[type=text]:focus, .form-container input[type=password]:focus {
+        background-color: #ddd;
+        outline: none;
+      }
+
+      /* Set a style for the submit/login button */
+      .form-container .btn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 16px 20px;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        margin-bottom:10px;
+        opacity: 0.8;
+      }
+
+      /* Add a red background color to the cancel button */
+      .form-container .cancel {
+        background-color: red;
+      }
+
+      /* Add some hover effects to buttons */
+      .form-container .btn:hover, .open-button:hover {
+        opacity: 1;
+      }
+
+    </style>
+  </head>
+  <body>
+
+    <!-- welcome message -->
+    <h1 class="pageheader">
+      Welcome to the Flight Insurance Dapp, what do you want to do today?
+    </h1>
+    <!-- loyalty points notification -->
+    <h2 id="header2" class="pageheader">
+      You currently have xxx loyalty points(LP).
+    </h2>
+
+    <div id="buyticketsection" class="majorblock">
+      <div id="claimsection" class="minorblock">
+        <h2>Buy Tickets</h2><br>
+        <p class="iconpng"> <img src="assets\icons\buy.png" width="240px" height="240px" </p>
+      </div>
+      <div id="claimdetailsection" class="minorblock">
+        <h2>Ticket Details</h2><br>
+        <table class="tixtable">
+          <tr>
+            <th class="tixheader">Round-Trip Ticket*</th>
+            <th class="tixheader">One-Way Ticket*</th>
+          </tr>
+
+          <tr>
+            <td class="tixcell"><b>SGD$30</b> OR <b>150LP</b></td>
+            <td class="tixcell"><b>SGD$20</b> OR <b>100LP</b></td>
+          </tr>
+
+          <tr>
+            <td id="tixtablefootnote" colspan="2">
+              *You will be entitled to 30LP or 10LP for purchasing a RTT or OWT respectively.
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="minorblock">
+        <h2>Purchase Tickets</h2><br>
+        <table id="buytixtable" class="buytixtable">
+          <tr>
+            <td class="bttfont">Choose Ticket Type:</td>
+            <td>
+              <select class="bttinput" name="">
+                <option value="rtt">Round-Trip Ticket</option>
+                <option value="owt">One-Way Ticket</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="bttfont">Enter Flight Number:</td>
+            <td>
+              <input class="bttinput" type="text" id="buyflightnum" name="" value="">
+            </td>
+          </tr>
+          <tr>
+            <td class="bttfont">Select Departure Date:</td>
+            <td>
+              <input class="bttinput" type="date" id="buydepartdate" name="" value="">
+            </td>
+          </tr>
+          <tr>
+            <td class="bttfont">Enter Departure Airport:</td>
+            <td>
+              <input class="bttinput" type="text" id="buydap" name="" value="">
+            </td>
+          </tr>
+        </table><br>
+        <div>
+          <button class="leftrightbuybutton" type="button" name="button"><b> Buy with SGD </b></button>
+          <button class="leftrightbuybutton" type="button" name="button"><b> Buy with LP </b></button>
+        </div>
+      </div>
+    </div><br><br>
+
+    <div id="claimflightinsurancesection" class="majorblock2">
+      <div class="minorblock2">
+        <h2>Claim Flight Insurance </h2><br>
+        <p class="iconpng"> <img src="assets\icons\flight.png" width="240px" height="240px" </p>
+      </div>
+      <div class="minorblock2">
+        <h2>Enter Your Flight Details</h2><br>
+        <table id="claimflighttable" class="claimflighttable">
+          <tr>
+            <td class="cftfont">Enter Flight Number:</td>
+            <td>
+              <input class="cftinput" type="text" id="claimflightnum" name="" value="">
+            </td>
+          </tr>
+          <tr>
+            <td class="cftfont">Select Departure Date:</td>
+            <td>
+              <input class="cftinput" type="date" id="claimdepartdate" name="" value="">
+            </td>
+          </tr>
+          <tr>
+            <td class="cftfont">Enter Departure Airport:</td>
+            <td>
+              <input class="cftinput" type="text" id="claimdap" name="" value="">
+            </td>
+          </tr>
+        </table><br>
+        <button class="claimsbutton" type="button" name="claimssbutton"
+        onclick="claimAlert()"><b> Claim Insurance </b></button>
+
+      </div>
+    </div><br><br>
+  </body>
+</html>

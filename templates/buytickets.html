@@ -46,38 +46,39 @@
       }
     </style>
   <script lang="javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script lang="javascript" src="{{url_for('static', filename='ethereum_enable.js')}}"></script>
   <script lang="javascript">
     var contract;
     var contract2;
     var contract3;
 
     window.addEventListener('load', async () => {
-        // Modern dapp browsers...
-        if (window.ethereum) {
-            window.web3 = new Web3(ethereum);
-            try {
-              // Request account access if needed
-              await ethereum.enable();
-              // Acccounts now exposed
-              web3.eth.sendTransaction({/* ... */});
-            } catch (error) {
-                // User denied account access...
-            }
-        }
-        // Legacy dapp browsers...
-        else if (window.web3) {
-            window.web3 = new Web3(web3.currentProvider);
-            // Acccounts always exposed
+      // Modern dapp browsers...
+      if (window.ethereum) {
+          window.web3 = new Web3(ethereum);
+          try {
+            // Request account access if needed
+            await ethereum.enable();
+            // Acccounts now exposed
             web3.eth.sendTransaction({/* ... */});
-        }
-        // Non-dapp browsers...
-        else {
-            console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
-        }
+          } catch (error) {
+              // User denied account access...
+          }
+      }
+      // Legacy dapp browsers...
+      else if (window.web3) {
+          window.web3 = new Web3(web3.currentProvider);
+          // Acccounts always exposed
+          web3.eth.sendTransaction({/* ... */});
+      }
+      // Non-dapp browsers...
+      else {
+          console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+      }
+      updateFields();
     });
-
+    
     function updateFields() {
-      // await ethereum.send('eth_requestAccounts');
       contract.getLoyaltyPoints(function(error, result){
         if (error) {
           reject(error);
@@ -105,8 +106,8 @@
             contract2 = contractInstance2;
             contract = contractInstance;
 
-            // we delay here before updating loyalty points to make sure web3.eth.accounts is populated.
-            setTimeout(updateFields, 1000);
+            // // we delay here before updating loyalty points to make sure web3.eth.accounts is populated.
+            // setTimeout(updateFields, 1000);
             
             var cost1way = 0;
             contractInstance.convertToWei.call(2000, function(error, result){

@@ -4,4 +4,9 @@
 
 ## Notes
 * Javascript web3 docs: https://github.com/ethereum/wiki/wiki/JavaScript-API#contract-methods
-* 
+
+
+## TODO
+* attempt to use it on Ropsten.
+* Look into modifiers https://solidity.readthedocs.io/en/v0.4.24/common-patterns.html#restricting-access
+* Untrusted functions and reentrancy https://consensys.github.io/smart-contract-best-practices/known_attacks/ (security)

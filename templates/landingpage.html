@@ -24,63 +24,6 @@
         text-align: center;
       }
     </style>
-    <script lang="javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script lang="javascript">
-      var contract;
-      var contract2;
-
-      $(document).ready(function() {
-          if (typeof web3 !== 'undefined') {
-              var sc_address = "{{contractAddress}}";
-              var contractABI = web3.eth.contract(JSON.parse('{{contractABI | safe}}'));
-              var contractInstance = contractABI.at(sc_address);
-              
-              var sc_address2 = "{{contractAddressDetails}}";
-              var contractABI2 = web3.eth.contract(JSON.parse('{{contractABIDetails | safe}}')); 
-              var contractInstance2 = contractABI2.at(sc_address2);
-              
-              contract2 = contractInstance2;
-              contract = contractInstance;
-              $("#claim").click(function(){
-                  contractInstance.getOwner(function(error, result){
-                    if (error) {
-                        alert("Please, connect to the network");
-                        reject(error);
-                    } else {
-                        $("span#entitled").text(result);
-                    }
-                  });
-              });
-              $("#buy").click(function(){
-                  contractInstance.getPlayerCount(function(error, result){
-                    if (error) {
-                        alert("Please, connect to the network");
-                        reject(error);
-                    } else {
-                        $("span#number").text(result);
-                      //   alert("getplayercount");
-                      //   alert(result);
-                    }
-                  });
-              });
-              $("a#call_setNumber").click(function(){
-                        var newNumber = $("input#number").val();
-                        // alert(web3.eth.accounts[0]);
-                        // const web32 = new Web3(window.web3.currentProvider);
-                        // console.log(web32.eth.accounts)
-                        contractInstance.convertToWei.call(newNumber, function(error, result){
-                          if (error) {
-                              alert("Please, connect to the network");
-                              reject(error);
-                          }
-                        });
-                    });
-          }
-          else {
-              alert("Please, install Metamask!");
-          }
-      });
-  </script>
   </head>
   <body>
     <h1>
@@ -90,24 +33,22 @@
     <p>
       Welcome, what do you want to do today?
     </p>
-    <span id="exchangerate"></span>
 
     <div id="buttons" class="row">
       <div class="column">
         Buy Tickets <br> <br>
         <form class="buytixbutton" action="" method="">
-          <input type="image" src="assets\icons\buy.png" id="buy" name="buytixbutton" alt="Buy Tickets" width="100" height="100">
+          <input type="image" src="static/buy.png" name="buytixbutton" alt="Buy Tickets" width="100" height="100">
         </form> <br>
-        <p><span id="entitled">0</span><p>
       <div class="column">
         Claim Insurance <br> <br>
         <form class="claimbutton" action="" method="">
-          <input type="image" src="assets\icons\claim.png" id="claim" name="buytixbutton" alt="Buy Tickets" width="100" height="100">
+          <input type="image" src="static\claim.png" name="buytixbutton" alt="Buy Tickets" width="100" height="100">
         </form> <br>
       <div class="column">
         <form class="buytixbutton" action="" method="">
           Check Flight Details <br> <br>
-          <input type="image" src="assets\icons\flight.png" id="checkDetails" name="buytixbutton" alt="Buy Tickets" width="100" height="100">
+          <input type="image" src="{{url_for('static', filename='flight.png')}}" name="buytixbutton" alt="Buy Tickets" width="100" height="100">
         </form> <br>
       </div>
     </div>
