@@ -104,7 +104,7 @@ contract FlightDelay{
         oracle.updateOracleCost();
 
         flightdetails.addUser(flightNumber, departureDate, from, user);
-        users[user].tickets.push(string(abi.encodePacked(flightNumber, " ", departureDate, " ", from)));
+        users[user].tickets.push(string(abi.encodePacked(flightNumber, "|", departureDate, "|", from)));
     }
 
     // Uses msg.sender as address
@@ -124,7 +124,11 @@ contract FlightDelay{
 
     // Allows the user to see his most recent ticket purchase.
     function getRecentTicket(address user) view public returns (string){
-        return users[user].tickets[users[user].tickets.length - 1];
+        string[] usertickets = users[user].tickets;
+        if (usertickets.length > 0) {
+            return usertickets[usertickets.length - 1];
+        }
+        return "";
     }
 
     function getRecentTicketSelf() view public returns (string){

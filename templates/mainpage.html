@@ -186,6 +186,15 @@
       });
       
       function updateFields() {
+        contract.getRecentTicket.call(web3.eth.accounts[0], function(error, result){
+          if (error) {
+            reject(error);
+          } else {
+            if (result !== "") {
+              $("#recentlybought").text("You recently bought insurance for " + result);
+            }
+          }
+        });
         contract.getLoyaltyPoints(function(error, result){
           if (error) {
             reject(error);
@@ -244,97 +253,96 @@
 
 
       $(document).ready(function() {
-          if (typeof web3 !== 'undefined') {
-              var sc_address = "{{contractAddress}}";
-              var contractABI = web3.eth.contract(JSON.parse('{{contractABI | safe}}'));
-              var contractInstance = contractABI.at(sc_address);
-              
-              var sc_address2 = "{{contractAddressDetails}}";
-              var contractABI2 = web3.eth.contract(JSON.parse('{{contractABIDetails | safe}}')); 
-              var contractInstance2 = contractABI2.at(sc_address2);
-              
-              var sc_address3 = "{{contractAddressOracle}}";
-              var contractABI3 = web3.eth.contract(JSON.parse('{{contractABIOracle | safe}}')); 
-              var contractInstance3 = contractABI3.at(sc_address3);
+        if (typeof web3 !== 'undefined') {
+          var sc_address = "{{contractAddress}}";
+          var contractABI = web3.eth.contract(JSON.parse('{{contractABI | safe}}'));
+          var contractInstance = contractABI.at(sc_address);
+          
+          var sc_address2 = "{{contractAddressDetails}}";
+          var contractABI2 = web3.eth.contract(JSON.parse('{{contractABIDetails | safe}}')); 
+          var contractInstance2 = contractABI2.at(sc_address2);
+          
+          var sc_address3 = "{{contractAddressOracle}}";
+          var contractABI3 = web3.eth.contract(JSON.parse('{{contractABIOracle | safe}}')); 
+          var contractInstance3 = contractABI3.at(sc_address3);
 
-              contract3 = contractInstance3;
-              contract2 = contractInstance2;
-              contract = contractInstance;
-              
-              var cost1way = 0;
-              contractInstance.convertToWei.call(2000, function(error, result){
+          contract3 = contractInstance3;
+          contract2 = contractInstance2;
+          contract = contractInstance;
+          
+          var cost1way = 0;
+          contractInstance.convertToWei.call(2000, function(error, result){
+            if (error) {
+              alert("Error");
+              reject(error);
+            } else {
+              // console.log(result);
+              $("#cost1way").text(result);
+              cost1way = result;
+            }
+          });
+          contractInstance.convertToWei.call(3000, function(error, result){
+            if (error) {
+              alert("Error");
+              reject(error);
+            } else {
+              $("#cost2way").text(result);
+            }
+          });
+
+          function buy1wayticket(points) {
+            var flightnum = $("#buyflightnum")[0].value;
+            contractInstance.buyTicket(
+              flightnum ,$("#buydepartdate")[0].value,$("#buydap")[0].value, points,
+              {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
                 if (error) {
-                  alert("Error");
+                  alert("Please, connect to the network");
                   reject(error);
                 } else {
-                  // console.log(result);
-                  $("#cost1way").text(result);
-                  cost1way = result;
+                  alert("Bought insurance for " + flightnum);
+                  updateFields();
                 }
-              });
-              contractInstance.convertToWei.call(3000, function(error, result){
-                if (error) {
-                  alert("Error");
-                  reject(error);
-                } else {
-                  $("#cost2way").text(result);
-                }
-              });
-
-              function buy1wayticket(points) {
-                var flightnum = $("#buyflightnum")[0].value;
-                contractInstance.buyTicket(
-                  flightnum ,$("#buydepartdate")[0].value,$("#buydap")[0].value, points,
-                  {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
-                    if (error) {
-                      alert("Please, connect to the network");
-                      reject(error);
-                    } else {
-                      alert("Bought insurance for " + flightnum);
-                      updateFields();
-                    }
-                  }
-                );
               }
-
-              function buy2wayticket(points) {
-                // contractInstance.buyTicket2(
-                //   ...
-                // );
-              }
-
-              $("#sgdticket").click(function(){
-                if($("#ticketoption")[0].value === "rtt"){
-
-                } 
-                else {
-                  buy1wayticket(false);
-                }
-
-              });
-
-              $("#lpticket").click(function(){
-                if($("#ticketoption")[0].value === "rtt"){
-
-                }
-                else {
-                  buy1wayticket(true);
-                }
-              })
-
-              $("#buy1way").click(function(){
-                buy1wayticket(false);
-              });
-
-              $("#buy1waypoints").click(function(){
-                buy1wayticket(true);
-              });
-
+            );
           }
-          else {
-              alert("Please, install Metamask!");
+
+          function buy2wayticket(points) {
+            // contractInstance.buyTicket2(
+            //   ...
+            // );
           }
-      });
+
+          $("#sgdticket").click(function(){
+            if($("#ticketoption")[0].value === "rtt"){
+
+            } 
+            else {
+              buy1wayticket(false);
+            }
+
+          });
+
+          $("#lpticket").click(function(){
+            if($("#ticketoption")[0].value === "rtt"){
+
+            }
+            else {
+              buy1wayticket(true);
+            }
+          })
+
+          $("#buy1way").click(function(){
+            buy1wayticket(false);
+          });
+
+          $("#buy1waypoints").click(function(){
+            buy1wayticket(true);
+          });
+        }
+        else {
+            alert("Please, install Metamask!");
+        }
+    });
     </script>
 
   </head>
@@ -348,6 +356,7 @@
     <!-- loyalty points notification -->
     <h2 id="header2" class="pageheader">
       You currently have <span id="points"></span> loyalty points(LP).
+      <div id="recentlybought"></div>
     </h2>
 
     <div id="buyticketsection" class="majorblock">
