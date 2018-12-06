@@ -5,9 +5,6 @@ import json
 
 from flask import Flask, render_template
 
-from web3.auto import w3
-from solc import compile_source
-
 app = Flask(__name__)
 
 contract_source_code = None
@@ -68,9 +65,19 @@ DelayContract.functions.updateOracle(OracleReceipt.contractAddress).transact()
 DelayContract.functions.updateFlightDetails(DetailsReceipt.contractAddress).transact()
 DetailsContract.functions.addAdmin(DelayReceipt.contractAddress).transact()
 
-
 # Just for testing purposes:
 w3.eth.sendTransaction({"to":"0xe48AEcF573F7D65038C274b97AA9979D73Eb4c7B", "from": w3.eth.accounts[9], "value": w3.toWei("5", "ether")})
+
+# # Query SIA API
+# from threading import Thread
+# from time import time
+
+# API_KEY = "ckjvam4eakgru7feehf3v3aj"
+# class Query(Thread):
+#     def __init__():
+
+
+
 
 @app.route("/")
 def home():
