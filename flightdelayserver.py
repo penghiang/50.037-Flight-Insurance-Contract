@@ -2,8 +2,10 @@ from solc import compile_source
 from web3.auto import w3
 
 import json
+import requests
+from datetime import datetime
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -119,6 +121,63 @@ def mainpage():
         contractABIOracle = json.dumps(interfaceOracle['abi'])
     )
 
+@app.route("/sia_query", methods=["POST"])
+def sia_query():
+    API_KEY = "ckjvam4eakgru7feehf3v3aj"
+    API_link = "https://apigw.singaporeair.com/api/v3/flightstatus/getbynumber"
+
+    data = {
+        "request":{
+            "airline": ""
+        },
+        "clientUUID":"client1"
+    }
+
+    airlinecode = ""
+    flightnumber = ""
+    origin = ""
+    date = ""
+    
+    try:
+        airlinecode = request.json["airline"]
+        flightnumber = request.json["flightnum"]
+        origin = request.json["origin"]
+        date = request.json["date"]
+    except KeyError:
+        print("exception")
+    data["request"]["airlineCode"] = airlinecode
+    data["request"]["flightNumber"] = flightnumber
+    data["request"]["originAirportCode"] = origin
+    data["request"]["scheduledDepartureDate"] = date
+
+    r = requests.post(API_link, data=str(data), headers={"apikey":API_KEY, "content-type": "application/json"})
+    # check the result time if time is good or bad or wtv
+
+    results = r.json()
+    if (results["status"] == "SUCCESS"):
+        leg = results["response"]["flights"][0]["legs"][0]
+
+        if(leg["flightStatus"].lower() == "cancelled"):
+            return "cancelled"
+        if(leg["flightStatus"].lower() == "delayed"):
+            return "delayed"
+            
+        datetimeformat = "%Y-%m-%dT%H:%M"
+        scheduled_dt = datetime.strptime(leg["scheduledArrivalTime"], datetimeformat)
+        try:
+            actual_dt = datetime.strptime(leg["actualArrivalTime"], datetimeformat)
+        except KeyError:
+            return "no actualArrivalTime"
+
+        diff = actual_dt - scheduled_dt
+        if (diff.total_seconds() > 3600):
+            # 1 hour delay
+            return "delayed"
+        return ""
+    return "failed"
+    # print(r.text)
+    # return r.text
+    # return r.json()
 
 
 if __name__ == "__main__":
