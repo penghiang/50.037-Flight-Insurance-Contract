@@ -54,6 +54,7 @@ DelayReceipt = w3.eth.waitForTransactionReceipt(tx_hash2)
 OracleReceipt = w3.eth.waitForTransactionReceipt(tx_hash3)
 
 
+
 # Contract Object
 DetailsContract = w3.eth.contract(address=DetailsReceipt.contractAddress, abi=interfaceDetails['abi'])
 DelayContract = w3.eth.contract(address=DelayReceipt.contractAddress, abi=interfaceDelay['abi'])

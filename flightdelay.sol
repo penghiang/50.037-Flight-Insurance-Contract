@@ -89,8 +89,8 @@ contract FlightDelay{
     // Updates the oracle's conversion rate and cost
     // Updates FlightDetails with user information.
     // Adds tickets to users list, which we can display later.
-    function _buyTicket(string flightNumber, string departureDate, string from, address user) public payable{
-        
+    function _buyTicket(string flightNumber, string departureDate, string from, address user) private{
+
         FlightDetails flightdetails = FlightDetails(flightDetails);
         Oraclize oracle = Oraclize(SGDoracle);
 

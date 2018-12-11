@@ -188,7 +188,7 @@
       function updateFields() {
         contract.getRecentTicket.call(web3.eth.accounts[0], function(error, result){
           if (error) {
-            reject(error);
+            // reject(error);
           } else {
             if (result !== "") {
               $("#recentlybought").text("You recently bought insurance for " + result);
@@ -222,7 +222,10 @@
                 console.log("Promise error for claimAPI");
               });
               claimAmount(flightnum, date, from).then(function(result){
-                alert("Claimed insurance for: " + flightnum + ", amount: " + result); 
+                alert("Claiming insurance for: " + flightnum + ", amount: " + result); 
+                if (result === 0){
+                  alert("Please check again a while later!");
+                }
               }, function(err) {
                 console.log("Promise error");
               });
@@ -245,7 +248,7 @@
               console.log(xhr.responseText);
               resolve(xhr.responseText);
             }
-            console.log("onreadystatechange error?");
+            // console.log("onreadystatechange error?");
           };
           var data = JSON.stringify({
             "airline": airlinecode,
@@ -299,6 +302,7 @@
           contract = contractInstance;
           
           var cost1way = 0;
+          var cost2way = 0;
           contractInstance.convertToWei.call(2000, function(error, result){
             if (error) {
               alert("Error");
@@ -315,6 +319,7 @@
               reject(error);
             } else {
               $("#cost2way").text(result);
+              cost2way = result;
             }
           });
 
@@ -324,8 +329,8 @@
               flightnum ,$("#buydepartdate")[0].value,$("#buydap")[0].value, points,
               {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
                 if (error) {
-                  alert("Please, connect to the network");
-                  reject(error);
+                  alert("Did not buy ticket.");
+                  // reject(error);
                 } else {
                   alert("Bought insurance for " + flightnum);
                   updateFields();
@@ -339,10 +344,10 @@
             var flightnum2 = $("#buy2ndflightnum")[0].value;
             contractInstance.buyTicket2(
               flightnum ,$("#buydepartdate")[0].value,$("#buydap")[0].value,flightnum2,$("#buy2nddepartdate")[0].value,$("#buy2nddap")[0].value, points,
-              {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
+              {value: cost2way, from:web3.eth.accounts[0]} ,function(error, result){
                 if (error) {
-                  alert("Please, connect to the network");
-                  reject(error);
+                  alert("Did not buy ticket.");
+                  // reject(error);
                 } else {
                   alert("Bought insurance for " + flightnum + " and " + flightnum2);
                   updateFields();
