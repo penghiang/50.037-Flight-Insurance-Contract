@@ -62,7 +62,7 @@
         padding: 0px;
       }
 
-      #buytixtable, #claimflighttable {
+      #buytixtable, #claimflighttable, #claim2ndflighttable {
         border: 0px;
         padding: 0px;
         margin-left: auto;
@@ -184,7 +184,7 @@
         }
         updateFields();
       });
-      
+
       function updateFields() {
         contract.getRecentTicket.call(web3.eth.accounts[0], function(error, result){
           if (error) {
@@ -203,7 +203,7 @@
           }
         });
       }
-
+  
       function claimAlert(){
         var flightnum = $("#claimflightnum")[0].value;
         var date = $("#claimdepartdate")[0].value;
@@ -216,14 +216,45 @@
               reject(error);
             } 
             else {
+              claimAPI(flightnum, date, from).then(function(result){
+                console.log(result);
+              }, function(err) {
+                console.log("Promise error for claimAPI");
+              });
               claimAmount(flightnum, date, from).then(function(result){
                 alert("Claimed insurance for: " + flightnum + ", amount: " + result); 
               }, function(err) {
                 console.log("Promise error");
-              })
+              });
             }
           }
         )
+      }
+
+      function claimAPI(flightnum, date, from) {
+        return new Promise(function(resolve, reject){
+          var airlinecode = flightnum.substring(0, 2);
+          var flightnumber = flightnum.substring(2).trim();
+          var xhr = new XMLHttpRequest();
+          var url = "/sia_query";
+          xhr.open("POST", url);
+          xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              // var json = JSON.parse(xhr.responseText);
+              console.log(xhr.responseText);
+              resolve(xhr.responseText);
+            }
+            console.log("onreadystatechange error?");
+          };
+          var data = JSON.stringify({
+            "airline": airlinecode,
+            "flightnum": flightnumber,
+            "origin": from,
+            "date": date
+          });
+          xhr.send(data);
+        });
       }
 
       function claimAmount(flightnum, date, from) {
@@ -245,9 +276,6 @@
             }
           )
         })
-        // await amount;
-        // console.log(amount);
-        // return amount;
       }
 
 
@@ -307,14 +335,25 @@
           }
 
           function buy2wayticket(points) {
-            // contractInstance.buyTicket2(
-            //   ...
-            // );
+            var flightnum = $("#buyflightnum")[0].value;
+            var flightnum2 = $("#buy2ndflightnum")[0].value;
+            contractInstance.buyTicket2(
+              flightnum ,$("#buydepartdate")[0].value,$("#buydap")[0].value,flightnum2,$("#buy2nddepartdate")[0].value,$("#buy2nddap")[0].value, points,
+              {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
+                if (error) {
+                  alert("Please, connect to the network");
+                  reject(error);
+                } else {
+                  alert("Bought insurance for " + flightnum + " and " + flightnum2);
+                  updateFields();
+                }
+              }
+            );
           }
 
           $("#sgdticket").click(function(){
             if($("#ticketoption")[0].value === "rtt"){
-
+              buy2wayticket(false);
             } 
             else {
               buy1wayticket(false);
@@ -324,20 +363,24 @@
 
           $("#lpticket").click(function(){
             if($("#ticketoption")[0].value === "rtt"){
-
+              buy2wayticket(true);
             }
             else {
               buy1wayticket(true);
             }
-          })
-
-          $("#buy1way").click(function(){
-            buy1wayticket(false);
           });
 
-          $("#buy1waypoints").click(function(){
-            buy1wayticket(true);
+          $("#claimbutton").click(function(){
+            claimAlert();
           });
+
+          // $("#buy1way").click(function(){
+          //   buy1wayticket(false);
+          // });
+
+          // $("#buy1waypoints").click(function(){
+          //   buy1wayticket(true);
+          // });
         }
         else {
             alert("Please, install Metamask!");
@@ -420,6 +463,27 @@
             </td>
           </tr>
         </table><br>
+        <p>If purchasing round trip tickets: </p><br>
+        <table id="buy2ndtixtable" class="buytixtable">
+          <tr>
+            <td class="bttfont">Enter 2nd Flight Number:</td>
+            <td>
+              <input class="bttinput" type="text" id="buy2ndflightnum" name="" value="">
+            </td>
+          </tr>
+          <tr>
+            <td class="bttfont">Select 2nd Departure Date:</td>
+            <td>
+              <input class="bttinput" type="date" id="buy2nddepartdate" name="" value="">
+            </td>
+          </tr>
+          <tr>
+            <td class="bttfont">Enter 2nd Departure Airport:</td>
+            <td>
+              <input class="bttinput" type="text" id="buy2nddap" name="" value="">
+            </td>
+          </tr>
+        </table><br>
         <div>
           <button class="leftrightbuybutton" type="button" name="button" id="sgdticket"><b> Buy with SGD </b></button>
           <button class="leftrightbuybutton" type="button" name="button" id="lpticket"><b> Buy with LP </b></button>
@@ -454,8 +518,8 @@
             </td>
           </tr>
         </table><br>
-        <button class="claimsbutton" type="button" name="claimssbutton"
-        onclick="claimAlert()"><b> Claim Insurance </b></button>
+        <button class="claimsbutton" type="button" name="claimssbutton" id="claimbutton"
+        ><b> Claim Insurance </b></button>
 
       </div>
     </div><br><br>

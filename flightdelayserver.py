@@ -137,6 +137,7 @@ def sia_query():
     flightnumber = ""
     origin = ""
     date = ""
+    # print(request.values)
     
     try:
         airlinecode = request.json["airline"]
@@ -144,7 +145,7 @@ def sia_query():
         origin = request.json["origin"]
         date = request.json["date"]
     except KeyError:
-        print("exception")
+        print("Key error for input json")
     data["request"]["airlineCode"] = airlinecode
     data["request"]["flightNumber"] = flightnumber
     data["request"]["originAirportCode"] = origin
@@ -153,13 +154,19 @@ def sia_query():
     r = requests.post(API_link, data=str(data), headers={"apikey":API_KEY, "content-type": "application/json"})
     # check the result time if time is good or bad or wtv
 
+    flightNumber = airlinecode + flightnumber
+
     results = r.json()
     if (results["status"] == "SUCCESS"):
         leg = results["response"]["flights"][0]["legs"][0]
 
         if(leg["flightStatus"].lower() == "cancelled"):
+            DetailsContract.functions.flightCancelled(flightNumber, date, origin).transact()
+            print("cancelled1")
             return "cancelled"
         if(leg["flightStatus"].lower() == "delayed"):
+            DetailsContract.functions.flightDelayed(flightNumber, date, origin).transact()
+            print("delayed1")
             return "delayed"
             
         datetimeformat = "%Y-%m-%dT%H:%M"
@@ -172,13 +179,31 @@ def sia_query():
         diff = actual_dt - scheduled_dt
         if (diff.total_seconds() > 3600):
             # 1 hour delay
+            DetailsContract.functions.flightDelayed(flightNumber, date, origin).transact()
+            print("delayed2")
             return "delayed"
         return ""
+    print("errored, here are the inputs:", airlinecode, flightnumber, origin, date)
     return "failed"
     # print(r.text)
     # return r.text
     # return r.json()
 
+def updateTicketInfo(flightNumber: str, date: str, origin: str, status: str):
+    if (status == "delayed"):
+        DetailsContract.functions.flightDelayed(flightNumber, date, origin)
+        print("Flight {} registered as delayed.".format(flightNumber))
+    elif (status == "cancelled"):
+        DetailsContract.functions.flightCancelled(flightNumber, date, origin)
+        print("Flight {} registered as cancelled.".format(flightNumber))
+    elif (status == "failed"):
+        print ("Failed update, error?")
+    elif (status == ""):
+        pass
+    elif (status == "no actualArrivalTime"):
+        print("SIA api has no actualArrivalTime, flight might not have arrived yet.")
+    else:
+        print("Shouldn't happen.")
 
 if __name__ == "__main__":
     app.run()
