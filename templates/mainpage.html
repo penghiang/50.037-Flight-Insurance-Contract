@@ -205,9 +205,9 @@
       }
   
       function claimAlert(){
-        var flightnum = $("#claimflightnum")[0].value;
-        var date = $("#claimdepartdate")[0].value;
-        var from = $("#claimdap")[0].value;
+        var flightnum = $("#claimflightnum")[0].value.toUpperCase();
+        var date = $("#claimdepartdate")[0].value.toUpperCase();
+        var from = $("#claimdap")[0].value.toUpperCase();
         contract.claimMoney(
           flightnum, date, from, 
           {from:web3.eth.accounts[0]}, function(error, result){
@@ -217,15 +217,12 @@
             } 
             else {
               claimAPI(flightnum, date, from).then(function(result){
-                console.log(result);
+                console.log("Status: " + result);
               }, function(err) {
                 console.log("Promise error for claimAPI");
               });
               claimAmount(flightnum, date, from).then(function(result){
-                alert("Claiming insurance for: " + flightnum + ", amount: " + result); 
-                if (result === 0){
-                  alert("Please check again a while later!");
-                }
+                alert("Claim submitted for: " + flightnum + ". If no money is received, please try again later."); 
               }, function(err) {
                 console.log("Promise error");
               });
@@ -251,10 +248,10 @@
             // console.log("onreadystatechange error?");
           };
           var data = JSON.stringify({
-            "airline": airlinecode,
-            "flightnum": flightnumber,
-            "origin": from,
-            "date": date
+            "airline": airlinecode.toUpperCase(),
+            "flightnum": flightnumber.toUpperCase(),
+            "origin": from.toUpperCase(),
+            "date": date.toUpperCase()
           });
           xhr.send(data);
         });
@@ -324,9 +321,9 @@
           });
 
           function buy1wayticket(points) {
-            var flightnum = $("#buyflightnum")[0].value;
+            var flightnum = $("#buyflightnum")[0].value.toUpperCase();
             contractInstance.buyTicket(
-              flightnum ,$("#buydepartdate")[0].value,$("#buydap")[0].value, points,
+              flightnum ,$("#buydepartdate")[0].value.toUpperCase(),$("#buydap")[0].value.toUpperCase(), points,
               {value: cost1way, from:web3.eth.accounts[0]} ,function(error, result){
                 if (error) {
                   alert("Did not buy ticket.");
@@ -340,10 +337,11 @@
           }
 
           function buy2wayticket(points) {
-            var flightnum = $("#buyflightnum")[0].value;
-            var flightnum2 = $("#buy2ndflightnum")[0].value;
+            var flightnum = $("#buyflightnum")[0].value.toUpperCase();
+            var flightnum2 = $("#buy2ndflightnum")[0].value.toUpperCase();
             contractInstance.buyTicket2(
-              flightnum ,$("#buydepartdate")[0].value,$("#buydap")[0].value,flightnum2,$("#buy2nddepartdate")[0].value,$("#buy2nddap")[0].value, points,
+              flightnum ,$("#buydepartdate")[0].value.toUpperCase(),$("#buydap")[0].value.toUpperCase(),
+              flightnum2,$("#buy2nddepartdate")[0].value.toUpperCase(),$("#buy2nddap")[0].value.toUpperCase(), points,
               {value: cost2way, from:web3.eth.accounts[0]} ,function(error, result){
                 if (error) {
                   alert("Did not buy ticket.");

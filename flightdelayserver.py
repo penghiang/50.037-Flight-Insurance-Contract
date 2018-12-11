@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 contract_source_code = None
 contract_source_code_file = 'FlightDetails.sol'
+myAddress = "0xe48AEcF573F7D65038C274b97AA9979D73Eb4c7B"
 
 with open(contract_source_code_file, 'r') as file:
     contract_source_code = file.read()
@@ -37,7 +38,7 @@ interfaceOracle = contract_compiled['<stdin>:Oraclize']
 
 
 # Set the default account
-w3.eth.defaultAccount = w3.eth.accounts[2]
+w3.eth.defaultAccount = w3.eth.accounts[0]
 
 # Contract abstraction
 DetailsAbstraction = w3.eth.contract(abi=interfaceDetails['abi'], bytecode=interfaceDetails['bin'])
@@ -69,7 +70,7 @@ DelayContract.functions.updateFlightDetails(DetailsReceipt.contractAddress).tran
 DetailsContract.functions.addAdmin(DelayReceipt.contractAddress).transact()
 
 # Just for testing purposes:
-w3.eth.sendTransaction({"to":"0xe48AEcF573F7D65038C274b97AA9979D73Eb4c7B", "from": w3.eth.accounts[9], "value": w3.toWei("5", "ether")})
+w3.eth.sendTransaction({"to":myAddress, "from": w3.eth.accounts[0], "value": w3.toWei("5", "ether")})
 
 # # Query SIA API
 # from threading import Thread
@@ -82,35 +83,35 @@ w3.eth.sendTransaction({"to":"0xe48AEcF573F7D65038C274b97AA9979D73Eb4c7B", "from
 
 
 
+# @app.route("/")
+# def home():
+#     return render_template('template.html', contractAddress = DelayContract.address.lower(), contractABI = json.dumps(interfaceDelay['abi']))
+
+# @app.route("/index")
+# def index():
+#     return render_template(
+#         'landingpage.html',
+#         contractAddress = DelayContract.address.lower(), 
+#         contractABI = json.dumps(interfaceDelay['abi']),
+#         contractAddressDetails = DetailsContract.address.lower(),
+#         contractABIDetails = json.dumps(interfaceDetails['abi']),
+#         contractAddressOracle = OracleContract.address.lower(),
+#         contractABIOracle = json.dumps(interfaceOracle['abi'])
+#     )
+
+# @app.route("/buy")
+# def buy():
+#     return render_template(
+#         'buytickets.html',
+#         contractAddress = DelayContract.address.lower(), 
+#         contractABI = json.dumps(interfaceDelay['abi']),
+#         contractAddressDetails = DetailsContract.address.lower(),
+#         contractABIDetails = json.dumps(interfaceDetails['abi']),
+#         contractAddressOracle = OracleContract.address.lower(),
+#         contractABIOracle = json.dumps(interfaceOracle['abi'])
+#     )
+
 @app.route("/")
-def home():
-    return render_template('template.html', contractAddress = DelayContract.address.lower(), contractABI = json.dumps(interfaceDelay['abi']))
-
-@app.route("/index")
-def index():
-    return render_template(
-        'landingpage.html',
-        contractAddress = DelayContract.address.lower(), 
-        contractABI = json.dumps(interfaceDelay['abi']),
-        contractAddressDetails = DetailsContract.address.lower(),
-        contractABIDetails = json.dumps(interfaceDetails['abi']),
-        contractAddressOracle = OracleContract.address.lower(),
-        contractABIOracle = json.dumps(interfaceOracle['abi'])
-    )
-
-@app.route("/buy")
-def buy():
-    return render_template(
-        'buytickets.html',
-        contractAddress = DelayContract.address.lower(), 
-        contractABI = json.dumps(interfaceDelay['abi']),
-        contractAddressDetails = DetailsContract.address.lower(),
-        contractABIDetails = json.dumps(interfaceDetails['abi']),
-        contractAddressOracle = OracleContract.address.lower(),
-        contractABIOracle = json.dumps(interfaceOracle['abi'])
-    )
-
-@app.route("/main")
 def mainpage():
     return render_template(
         'mainpage.html',
