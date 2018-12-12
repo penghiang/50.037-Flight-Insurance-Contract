@@ -70,3 +70,23 @@ After a user purchases a ticket, the most recently bought ticket would be shown 
 * Function `claimMoney` in `flightdelay.sol` has update changes before `.transfer` to prevent malicious callback functions
 
 * When claiming a delayed flight, we query an external API and update our contract. The return of money might be delayed, and the user might need to resend the query. 
+
+# Screenshots
+![Access Prompt](Screenshots/access_prompt.png)
+_Access prompt when we first start connecting_
+
+![Buying](Screenshots/buying.png)
+_Purchasing a ticket_
+
+![Bought confirmation](Screenshots/bought.png)
+_Confirmation of purchase and updated loyalty points._
+
+![Pre claim](Screenshots/pre_claim.png)
+_Amount of ether pre claim, we can see that the flight is delayed from the console_
+
+![Post claim](Screenshots/post_claim.png)
+_After submitting the claim again, we receive our money_
+
+![Attempting to buy delayed flight](Screenshots/attempting_to_buy_delayed_flight.png)
+_The contract prevents purchase of already delayed or cancelled flights_
+
